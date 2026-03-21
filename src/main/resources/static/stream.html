@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streaming Chatbot</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 h-screen flex flex-col">
+
+    <div class="flex-1 overflow-y-auto p-4">
+        <div id="chat-messages" class="space-y-4"></div>
+    </div>
+
+    <div class="p-4 bg-white">
+        <form id="chat-form">
+            <div class="flex space-x-4">
+                <input type="text" id="message-input" class="flex-1 border rounded p-2" placeholder="Escribe tu mensaje...">
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Enviar</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        const chatMessages = document.getElementById('chat-messages');
+        const chatForm = document.getElementById('chat-form');
+        const messageInput = document.getElementById('message-input');
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const message = messageInput.value;
+            messageInput.value = '';
+
+            // mensaje usuario
+            chatMessages.innerHTML += `<div class="bg-blue-100 p-2 rounded"><b>Tú:</b> ${message}</div>`;
+
+            // contenedor IA
+            const aiDiv = document.createElement('div');
+            aiDiv.className = 'bg-green-100 p-2 rounded';
+            aiDiv.innerHTML = '<b>IA:</b> ';
+            const span = document.createElement('span');
+            aiDiv.appendChild(span);
+            chatMessages.appendChild(aiDiv);
+
+            const res = await fetch(`/stream?message=${encodeURIComponent(message)}`);
+            const reader = res.body.getReader();
+            const decoder = new TextDecoder();
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                span.textContent += decoder.decode(value);
+            }
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+    </script>
+
+</body>
+</html>

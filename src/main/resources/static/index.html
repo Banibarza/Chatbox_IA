@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat normal</title>
+</head>
+<body>
+
+<input type="text" id="msg">
+<button onclick="send()">Enviar</button>
+
+<pre id="res"></pre>
+
+<script>
+function send() {
+    const msg = document.getElementById("msg").value;
+
+    fetch(`/chat?message=${msg}`)
+        .then(r => r.text())
+        .then(data => {
+            document.getElementById("res").textContent += "\nIA: " + data;
+        });
+}
+</script>
+
+</body>
+</html>
